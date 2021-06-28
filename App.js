@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { TextInput, FlatList, Text, View, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import CoinItem from './components/CoinItem';
 
@@ -18,6 +19,13 @@ const App = () => {
     setCoins(data);
   }
 
+  const refreshView = async () => {
+    setRefresh(true);
+    setSearch("");
+    await loadData();
+    setRefresh(false);
+  }
+
   useEffect(() => {
     loadData();
   }, []);
@@ -26,29 +34,32 @@ const App = () => {
     <View style={styles.cotainer}>
       <StatusBar backgroundColor="#141414" />
       <View style={styles.header}>
-        <Text style={styles.title}>Crytomarket</Text>
-        <TextInput
-          placeholder="Search a coin"
-          placeholderTextColor="#858585"
-          style={styles.searchInput}
-          onChangeText={text => setSearch(text)}
-        />
+        <Text style={styles.title}>CrytoMarket</Text>
+        <View style={styles.searchBar}>
+          <TextInput
+            placeholder="Search a coin"
+            placeholderTextColor="#858585"
+            style={styles.searchInput}
+            onChangeText={search => setSearch(search)}
+            value={search}
+          />
+          <Ionicons
+            size={25}
+            name="md-reload"
+            style={styles.iconReload}
+            onPress={() => refreshView()}
+          />
+        </View>
       </View>
       <FlatList
         refreshing={refresh}
-        onRefresh={async () => {
-          setRefresh(true);
-          setSearch("");
-          setRefresh(false);
-        }
-        }
+        onRefresh={() => { refreshView() }}
         style={styles.list}
-        showsVerticalScrollIndicator={false}
-        data={
-          coins.filter(coin =>
-            coin.name.toLowerCase().includes(search)
-            || coin.symbol.toLowerCase().includes(search)
-          )
+        // showsVerticalScrollIndicator={false}
+        data={coins.filter((coin) =>
+          coin.name.toLowerCase().includes(search)
+          || coin.symbol.toLowerCase().includes(search)
+        )
         }
         renderItem={({ item }) => {
           return <CoinItem coin={item}></CoinItem>
@@ -64,6 +75,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#141414',
     alignItems: 'center',
     flex: 1,
+    paddingTop: 30
   },
   title: {
     color: '#fff',
@@ -76,16 +88,23 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    overflow: 'hidden',
     width: '90%',
-    marginTop: 50
+    marginBottom: 30
   },
   searchInput: {
     color: '#fff',
     borderBottomColor: '#4657CE',
     borderBottomWidth: 1,
-    width: '40%',
     textAlign: 'center',
-    marginBottom: 20
+  },
+  iconReload: {
+    color: '#4657CE',
+    marginHorizontal: 20
+  },
+  searchBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
   }
 })
 
